@@ -43,21 +43,26 @@ function findTopCompetitorUrl(
     )
     .all(run_id, prompt_id, competitor.name);
 
-  if (rows.length === 0) return null;
-
-  const counts = new Map<string, number>();
-  for (const r of rows) {
-    let url = r.matched_text;
-    if (!url.startsWith("http")) url = `https://${url}`;
-    counts.set(url, (counts.get(url) ?? 0) + 1);
+  if (rows.length > 0) {
+    const counts = new Map<string, number>();
+    for (const r of rows) {
+      let url = r.matched_text;
+      if (!url.startsWith("http")) url = `https://${url}`;
+      counts.set(url, (counts.get(url) ?? 0) + 1);
+    }
+    const sorted = Array.from(counts.entries()).sort((a, b) => b[1] - a[1]);
+    if (aliases.length > 0) {
+      const matching = sorted.find(([u]) => aliases.some((a) => u.toLowerCase().includes(a)));
+      if (matching) return matching[0];
+    }
+    if (sorted[0]) return sorted[0][0];
   }
 
-  const sorted = Array.from(counts.entries()).sort((a, b) => b[1] - a[1]);
-  if (aliases.length > 0) {
-    const matching = sorted.find(([u]) => aliases.some((a) => u.toLowerCase().includes(a)));
-    if (matching) return matching[0];
+  if (aliases[0]) {
+    const a = aliases[0];
+    return a.startsWith("http") ? a : `https://${a}`;
   }
-  return sorted[0]?.[0] ?? null;
+  return null;
 }
 
 function buildSuggestPrompt(

@@ -11,7 +11,12 @@ export type ScrapedPage = {
 
 const DEFAULT_TIMEOUT_MS = 15_000;
 const MAX_CONTENT_CHARS = 8_000;
-const USER_AGENT = "openllmrank/0.1.0 (+https://github.com/foodaka/openllmrank)";
+// Many sites 403 unbranded crawlers. Use a realistic Chrome UA so public marketing
+// pages return content. We also send Accept and Accept-Language headers that real
+// browsers include; missing these is a common bot-detection signal.
+const USER_AGENT =
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 " +
+  "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
 
 const STRIP_SELECTORS = [
   "script",
@@ -56,7 +61,9 @@ export async function scrape(
     const res = await fetch(url, {
       headers: {
         "user-agent": USER_AGENT,
-        accept: "text/html,application/xhtml+xml",
+        accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "accept-language": "en-US,en;q=0.9",
+        "accept-encoding": "gzip, deflate, br",
       },
       redirect: "follow",
       signal: ctrl.signal,
