@@ -30,6 +30,33 @@ openllmrank report
 3. Results are stored in a local SQLite database with content-addressed prompt IDs (so editing a prompt creates a new tracking series rather than corrupting old data).
 4. `openllmrank report` generates a markdown gap-analysis: prompts where competitors are cited but you are not.
 
+## Choosing good prompts
+
+The quality of your insight is determined almost entirely by your prompt list. Bad prompts produce vanity metrics. Five things to know:
+
+**Prompts that work** — these surface real visibility signal:
+- **Category prompts.** "best X tools" / "top Y for Z" — the AI has to choose what to mention.
+- **Alternatives prompts.** "alternatives to [a competitor]" — exposes who shows up in the long tail.
+- **Persona prompts.** "fitness app where I can race friends in steps" — captures intent-driven discovery.
+- **Forced-choice prompts.** "top 3 enterprise X platforms for a 500-person company" — forces a ranking.
+
+**Prompts that don't work** — drop these from your config:
+- **Named comparisons.** "X vs Y vs Z" — every brand in the prompt gets 100% citation. That's an echo, not signal.
+- **Pure how-to.** "how do I set up a step challenge" — long answers, zero brand citations. The AI explains the *task*, not the *products*.
+- **Pure objection.** "problems with [category]" — same thing. AI describes problems generically without naming products.
+
+**Test:** if removing every brand name from the prompt would still produce a meaningful answer, it's a good prompt. If removing the brand name kills the prompt, it's an echo.
+
+## After your first run
+
+The first run is your baseline — but it usually surfaces three things to fix in your config:
+
+1. **Competitors you didn't list.** Read 2-3 raw responses. If a brand name appears repeatedly that you didn't track, add it to your `competitors` array. Your gap analysis is undercounting until you do.
+2. **Prompts that produced no citations from anyone.** Drop them and replace with category/alternatives prompts.
+3. **Prompts that produced 100% citations across the board.** They contain brand names — strip the names or replace with open-ended versions.
+
+Iterate the config 1-2 times before you treat the data as a baseline to track over time.
+
 ## Architecture
 
 - **Bun + TypeScript**, single binary via `bun build --compile`
