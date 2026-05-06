@@ -123,6 +123,26 @@ export function findUnfinishedRun(db: Database): string | null {
   return row?.run_id ?? null;
 }
 
+export function findLatestFinishedRun(db: Database): string | null {
+  const row = db
+    .query<{ run_id: string }, []>(
+      `SELECT run_id FROM runs WHERE finished_at IS NOT NULL ORDER BY started_at DESC LIMIT 1`,
+    )
+    .get();
+  return row?.run_id ?? null;
+}
+
+export function findFailedTuples(
+  db: Database,
+  run_id: string,
+): { prompt_id: string; sample_index: number }[] {
+  return db
+    .query<{ prompt_id: string; sample_index: number }, [string]>(
+      `SELECT prompt_id, sample_index FROM calls WHERE run_id = ? AND error_code IS NOT NULL`,
+    )
+    .all(run_id);
+}
+
 export function findMissingTuples(
   db: Database,
   run_id: string,

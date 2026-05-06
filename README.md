@@ -9,19 +9,80 @@
 
 ## Status
 
-**v0** — OpenAI only (Responses API with web_search). Anthropic, Gemini, Perplexity to follow in v0.1, v0.2, v0.3.
+**v0.1** — OpenAI only (Responses API with web_search) + the new `suggest` command. Anthropic, Gemini, Perplexity to follow.
+
+## Requirements
+
+- [Bun](https://bun.sh) 1.3 or later (the CLI is a TypeScript file executed by Bun; Node is not supported in v0).
+- An OpenAI API key with billing/credit (the v0 provider). Get one at https://platform.openai.com/api-keys.
+
+## Install
+
+From npm:
+```bash
+bun install -g openllmrank
+```
+
+From GitHub (latest main, including unpublished commits):
+```bash
+bun install -g github:foodaka/openllmrank
+```
+
+From source (for development):
+```bash
+git clone https://github.com/foodaka/openllmrank.git
+cd openllmrank
+bun install
+bun link
+```
 
 ## Quick start
 
 ```bash
-bun install -g openllmrank
 mkdir my-brand && cd my-brand
 openllmrank init
 # edit openllmrank.config.json with your brand, competitors, prompts
-export OPENAI_API_KEY=sk-...
-openllmrank run
-openllmrank report
+echo 'OPENAI_API_KEY=sk-...' > .env
+openllmrank run                   # query providers, persist results
+openllmrank report                # markdown gap analysis
+openllmrank suggest               # NEW: actionable content recommendations
+open gap-report.md suggestions.md
 ```
+
+## Commands
+
+| Command | What it does |
+|---------|--------------|
+| `openllmrank init` | Write a starter config and `.env.example` |
+| `openllmrank run` | Query each prompt × provider × N samples, persist to SQLite |
+| `openllmrank run --resume` | Resume the previous unfinished run from where it crashed |
+| `openllmrank run --retry-failed` | Re-query just the failed rows from the latest run |
+| `openllmrank report` | Generate `gap-report.md` from the rolling 7-day window |
+| `openllmrank suggest` | **NEW.** For each losing prompt, fetch the winning competitor's cited URL and your brand URL, and produce specific content recommendations |
+| `openllmrank export --since 7d` | Emit raw calls + citations as NDJSON for piping to `jq`/spreadsheets |
+
+## suggest in detail
+
+After a `run`, `suggest` analyzes your biggest gaps:
+
+```bash
+openllmrank suggest                          # top 3 losing prompts
+openllmrank suggest --top 5                  # top 5
+openllmrank suggest --prompt "office step"   # filter to one prompt (substring match)
+openllmrank suggest --output ideas.md
+```
+
+Under the hood, for each losing prompt it:
+
+1. Reads the winning competitor's cited URLs from the run's stored search results
+2. Fetches that page and your brand's main URL via plain HTTP (no headless browser)
+3. Extracts main content with cheerio (skips nav/footer/script)
+4. Sends both pages to GPT for structured comparison
+5. Writes a markdown file with: why the competitor wins, concrete content gaps, and 3-5 specific recommendations per losing prompt
+
+Cost: ~$0.005 per losing prompt analyzed (uses plain chat completions, not grounded calls).
+
+JS-rendered sites: if a fetched page returns < 200 chars of extractable content and looks like an SPA, that page is skipped with a clear note rather than failing the whole run.
 
 ## How it works
 

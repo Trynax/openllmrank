@@ -206,7 +206,7 @@ describe("executeRun", () => {
     });
     expect(summary.succeeded).toBe(0);
     expect(summary.failed).toBe(1);
-    expect(provider.calls).toBe(4);
+    expect(provider.calls).toBe(6);
     const row = db
       .query("SELECT error_code FROM calls WHERE prompt_id = ? AND sample_index = ?")
       .get(plan[0]!.prompt_id, 0) as { error_code: string };

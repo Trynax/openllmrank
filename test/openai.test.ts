@@ -169,6 +169,67 @@ describe("OpenAIProvider", () => {
     expect((caught as ProviderError).kind).toBe("bad_request");
   });
 
+  test("429 with quota/billing message classifies as auth (not rate_limit)", async () => {
+    const apiErr = new OpenAI.APIError(
+      429,
+      { error: { message: "You exceeded your current quota, please check your plan and billing details." } },
+      "You exceeded your current quota",
+      undefined,
+    );
+    const client = makeClient(async () => {
+      throw apiErr;
+    });
+    const p = new OpenAIProvider({ client });
+    let caught: unknown;
+    try {
+      await p.query({ prompt: "x", model: "gpt-4o-mini" });
+    } catch (e) {
+      caught = e;
+    }
+    expect((caught as ProviderError).kind).toBe("auth");
+    expect((caught as ProviderError).message).toContain("billing");
+  });
+
+  test("captures request_id from x-request-id header", async () => {
+    const apiErr = new OpenAI.APIError(
+      500,
+      { error: { message: "boom" } },
+      "boom",
+      { "x-request-id": "req_abc123def" } as never,
+    );
+    const client = makeClient(async () => {
+      throw apiErr;
+    });
+    const p = new OpenAIProvider({ client });
+    let caught: unknown;
+    try {
+      await p.query({ prompt: "x", model: "gpt-4o-mini" });
+    } catch (e) {
+      caught = e;
+    }
+    expect((caught as ProviderError).message).toContain("req_abc123def");
+  });
+
+  test("captures request_id from message body when no header", async () => {
+    const apiErr = new OpenAI.APIError(
+      500,
+      { error: { message: "Please include the request ID req_xyz789." } },
+      "Please include the request ID req_xyz789.",
+      undefined,
+    );
+    const client = makeClient(async () => {
+      throw apiErr;
+    });
+    const p = new OpenAIProvider({ client });
+    let caught: unknown;
+    try {
+      await p.query({ prompt: "x", model: "gpt-4o-mini" });
+    } catch (e) {
+      caught = e;
+    }
+    expect((caught as ProviderError).message).toContain("req_xyz789");
+  });
+
   test("constructor without API key throws auth error", () => {
     const original = process.env.OPENAI_API_KEY;
     delete process.env.OPENAI_API_KEY;

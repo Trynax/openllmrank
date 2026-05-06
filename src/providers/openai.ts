@@ -29,13 +29,31 @@ function estimateCost(model: string, tokens_in: number, tokens_out: number): num
   );
 }
 
+type ApiErrorLike = InstanceType<typeof OpenAI.APIError>;
+
+function extractRequestId(err: ApiErrorLike): string | undefined {
+  const headers = err.headers as Record<string, string> | undefined;
+  const headerId = headers?.["x-request-id"] ?? headers?.["X-Request-Id"];
+  if (headerId) return headerId;
+  const match = /req_[a-f0-9]+/.exec(err.message);
+  return match?.[0];
+}
+
+function withRequestId(err: ApiErrorLike, message: string): string {
+  const id = extractRequestId(err);
+  return id ? `${message} [request_id=${id}]` : message;
+}
+
 function classifyError(err: unknown): ProviderError {
   if (err instanceof OpenAI.APIError) {
     const status = err.status ?? 0;
     if (status === 401 || status === 403) {
       return {
         kind: "auth",
-        message: "OpenAI rejected the API key. Set OPENAI_API_KEY to a valid key.",
+        message: withRequestId(
+          err,
+          "OpenAI rejected the API key. Set OPENAI_API_KEY to a valid key.",
+        ),
         http_status: status,
         raw: err,
       };
@@ -43,9 +61,15 @@ function classifyError(err: unknown): ProviderError {
     if (status === 429) {
       const retryAfter = (err.headers as Record<string, string> | undefined)?.["retry-after"];
       const retry_after_ms = retryAfter ? Math.max(0, Number(retryAfter) * 1000) : undefined;
+      const isQuota = /quota|billing|insufficient/i.test(err.message);
       return {
-        kind: "rate_limit",
-        message: err.message,
+        kind: isQuota ? "auth" : "rate_limit",
+        message: withRequestId(
+          err,
+          isQuota
+            ? "OpenAI account has no credit. Add billing at https://platform.openai.com/settings/organization/billing/overview"
+            : err.message,
+        ),
         retry_after_ms,
         http_status: status,
         raw: err,
@@ -54,7 +78,7 @@ function classifyError(err: unknown): ProviderError {
     if (status >= 500 && status < 600) {
       return {
         kind: "transient",
-        message: err.message,
+        message: withRequestId(err, err.message),
         http_status: status,
         raw: err,
       };
@@ -62,14 +86,14 @@ function classifyError(err: unknown): ProviderError {
     if (status === 400 || status === 404 || status === 422) {
       return {
         kind: "bad_request",
-        message: err.message,
+        message: withRequestId(err, err.message),
         http_status: status,
         raw: err,
       };
     }
     return {
       kind: "unknown",
-      message: err.message,
+      message: withRequestId(err, err.message),
       http_status: status,
       raw: err,
     };

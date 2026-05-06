@@ -5,6 +5,8 @@ import cliProgress from "cli-progress";
 import {
   computePromptId,
   finishRun,
+  findFailedTuples,
+  findLatestFinishedRun,
   findMissingTuples,
   findUnfinishedRun,
   openDb,
@@ -125,6 +127,7 @@ export const runCmd = defineCommand({
     concurrency: { type: "string" },
     samples: { type: "string" },
     resume: { type: "boolean", default: false },
+    "retry-failed": { type: "boolean", default: false },
   },
   async run({ args }) {
     loadEnvFile();
@@ -141,7 +144,22 @@ export const runCmd = defineCommand({
 
     let run_id: string;
     let toExecute: PlanItem[];
-    if (args.resume) {
+    if (args["retry-failed"]) {
+      const latest = findLatestFinishedRun(db);
+      if (!latest) {
+        console.error("! No finished run to retry against. Run 'openllmrank run' first.");
+        process.exit(1);
+      }
+      run_id = latest;
+      const failed = findFailedTuples(db, run_id);
+      const failedKeys = new Set(failed.map((f) => `${f.prompt_id}|${f.sample_index}`));
+      toExecute = plan.filter((p) => failedKeys.has(`${p.prompt_id}|${p.sample_index}`));
+      if (toExecute.length === 0) {
+        console.log(`No failed rows in latest run (${run_id}). Nothing to retry.`);
+        return;
+      }
+      console.log(`Retrying ${toExecute.length} failed rows from run ${run_id}.`);
+    } else if (args.resume) {
       const existing = findUnfinishedRun(db);
       if (!existing) {
         console.error("! No unfinished run to resume. Starting a new run instead.");
