@@ -1,0 +1,239 @@
+import { existsSync, readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { defineCommand } from "citty";
+import cliProgress from "cli-progress";
+import {
+  computePromptId,
+  finishRun,
+  findMissingTuples,
+  findUnfinishedRun,
+  openDb,
+  startRun,
+  upsertPrompt,
+  type PlannedTuple,
+} from "../core/db";
+import { ConfigSchema, type Config, type Provider, type ProviderId } from "../core/types";
+import { executeRun, type PlanItem } from "../core/runner";
+import { OpenAIProvider } from "../providers/openai";
+
+function loadConfig(path: string): Config {
+  if (!existsSync(path)) {
+    console.error(`! ${path} not found. Run 'openllmrank init' first.`);
+    process.exit(1);
+  }
+  let raw: unknown;
+  try {
+    raw = JSON.parse(readFileSync(path, "utf8"));
+  } catch (e) {
+    console.error(`! ${path} is not valid JSON: ${(e as Error).message}`);
+    process.exit(1);
+  }
+  const parsed = ConfigSchema.safeParse(raw);
+  if (!parsed.success) {
+    console.error(`! ${path} failed validation:`);
+    for (const issue of parsed.error.issues) {
+      console.error(`    ${issue.path.join(".")}: ${issue.message}`);
+    }
+    process.exit(1);
+  }
+  return parsed.data;
+}
+
+function loadEnvFile(): void {
+  if (!existsSync(".env")) return;
+  const content = readFileSync(".env", "utf8");
+  for (const line of content.split("\n")) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) continue;
+    const eq = trimmed.indexOf("=");
+    if (eq < 0) continue;
+    const key = trimmed.slice(0, eq).trim();
+    const value = trimmed.slice(eq + 1).trim();
+    if (!process.env[key]) process.env[key] = value;
+  }
+}
+
+function buildProviders(cfg: Config): Map<ProviderId, Provider> {
+  const map = new Map<ProviderId, Provider>();
+  const wantedIds = new Set(cfg.providers.map((p) => p.id));
+  if (wantedIds.has("openai")) {
+    try {
+      map.set("openai", new OpenAIProvider());
+    } catch (e) {
+      const err = e as { kind?: string; message?: string };
+      console.error(`! ${err.message ?? e}`);
+      process.exit(1);
+    }
+  }
+  for (const id of wantedIds) {
+    if (id !== "openai") {
+      console.error(
+        `! Provider '${id}' is not implemented yet. v0 supports OpenAI only. Coming in v0.1+.`,
+      );
+      process.exit(1);
+    }
+  }
+  return map;
+}
+
+function configHash(cfg: Config): string {
+  return createHash("sha256").update(JSON.stringify(cfg)).digest("hex").slice(0, 16);
+}
+
+function buildPlan(
+  cfg: Config,
+  db: ReturnType<typeof openDb>,
+  samplesOverride?: number,
+): PlanItem[] {
+  const plan: PlanItem[] = [];
+  const samples = samplesOverride ?? cfg.samples_per_prompt;
+  for (const provCfg of cfg.providers) {
+    for (const prompt_text of cfg.prompts) {
+      const prompt_id = computePromptId(prompt_text, provCfg.model, provCfg.id, {
+        tools: ["web_search"],
+      });
+      upsertPrompt(
+        db,
+        prompt_id,
+        prompt_text,
+        provCfg.model,
+        provCfg.id,
+        JSON.stringify({ tools: ["web_search"] }),
+      );
+      for (let i = 0; i < samples; i++) {
+        plan.push({
+          prompt_id,
+          prompt_text,
+          model: provCfg.model,
+          provider_id: provCfg.id,
+          sample_index: i,
+        });
+      }
+    }
+  }
+  return plan;
+}
+
+export const runCmd = defineCommand({
+  meta: {
+    name: "run",
+    description: "Query providers for each configured prompt and persist results",
+  },
+  args: {
+    config: { type: "string", default: "openllmrank.config.json" },
+    db: { type: "string", default: "data/openllmrank.db" },
+    concurrency: { type: "string" },
+    samples: { type: "string" },
+    resume: { type: "boolean", default: false },
+  },
+  async run({ args }) {
+    loadEnvFile();
+    const cfg = loadConfig(args.config);
+    const concurrency = args.concurrency
+      ? Number.parseInt(args.concurrency, 10)
+      : cfg.concurrency_per_provider;
+    const samples = args.samples ? Number.parseInt(args.samples, 10) : undefined;
+
+    const db = openDb(args.db);
+    const providers = buildProviders(cfg);
+    const cfg_hash = configHash(cfg);
+    const plan = buildPlan(cfg, db, samples);
+
+    let run_id: string;
+    let toExecute: PlanItem[];
+    if (args.resume) {
+      const existing = findUnfinishedRun(db);
+      if (!existing) {
+        console.error("! No unfinished run to resume. Starting a new run instead.");
+        run_id = new Date().toISOString().replace(/[:.]/g, "-");
+        startRun(db, run_id, cfg_hash);
+        toExecute = plan;
+      } else {
+        run_id = existing;
+        const planned: PlannedTuple[] = plan.map((p) => ({
+          prompt_id: p.prompt_id,
+          sample_index: p.sample_index,
+        }));
+        const missing = findMissingTuples(db, run_id, planned);
+        const missingKeys = new Set(missing.map((m) => `${m.prompt_id}|${m.sample_index}`));
+        toExecute = plan.filter((p) =>
+          missingKeys.has(`${p.prompt_id}|${p.sample_index}`),
+        );
+        console.log(
+          `Resuming run ${run_id}: ${toExecute.length} of ${plan.length} calls remaining.`,
+        );
+      }
+    } else {
+      run_id = new Date().toISOString().replace(/[:.]/g, "-");
+      startRun(db, run_id, cfg_hash);
+      toExecute = plan;
+    }
+
+    if (toExecute.length === 0) {
+      console.log("Nothing to do. Run already complete.");
+      finishRun(db, run_id);
+      return;
+    }
+
+    const ctrl = new AbortController();
+    const onSigint = () => {
+      console.error("\n! Interrupted. Finalizing partial run; resume with --resume.");
+      ctrl.abort();
+    };
+    process.on("SIGINT", onSigint);
+
+    const bar = new cliProgress.SingleBar(
+      {
+        format: "  {bar} | {value}/{total} | ok={ok} fail={fail} | ${cost_usd}",
+        hideCursor: true,
+        stream: process.stderr,
+      },
+      cliProgress.Presets.shades_classic,
+    );
+    bar.start(toExecute.length, 0, { ok: 0, fail: 0, cost_usd: "0.0000" });
+
+    let ok = 0;
+    let fail = 0;
+    let cost = 0;
+
+    try {
+      const summary = await executeRun({
+        db,
+        run_id,
+        plan: toExecute,
+        providers,
+        brand: cfg.brand,
+        competitors: cfg.competitors,
+        concurrency_per_provider: concurrency,
+        signal: ctrl.signal,
+        onProgress: (done, total, status) => {
+          if (status === "ok") ok += 1;
+          else if (status) fail += 1;
+          bar.update(done, { ok, fail, cost_usd: cost.toFixed(4) });
+        },
+      });
+      cost = summary.cost_usd_total;
+      bar.update(toExecute.length, { ok: summary.succeeded, fail: summary.failed, cost_usd: cost.toFixed(4) });
+      bar.stop();
+
+      if (!summary.aborted) {
+        finishRun(db, run_id);
+      }
+      console.log(
+        `\nDone. ${summary.succeeded} succeeded, ${summary.failed} failed. Cost: $${summary.cost_usd_total.toFixed(4)}.`,
+      );
+      console.log(`Next: openllmrank report`);
+    } catch (e) {
+      bar.stop();
+      const err = e as { name?: string; message?: string };
+      if (err.name === "FatalAuthError") {
+        console.error(`\n! Auth failed: ${err.message}`);
+        console.error(`  Set OPENAI_API_KEY (in your environment or a .env file).`);
+        process.exit(1);
+      }
+      throw e;
+    } finally {
+      process.off("SIGINT", onSigint);
+    }
+  },
+});
