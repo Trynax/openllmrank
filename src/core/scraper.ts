@@ -1,4 +1,5 @@
 import { load } from "cheerio";
+import robotsParser from "robots-parser";
 
 export type ScrapedPage = {
   url: string;
@@ -8,6 +9,42 @@ export type ScrapedPage = {
   ok: boolean;
   reason?: string;
 };
+
+const USER_AGENT_TOKEN = "openllmrank";
+
+const robotsCache = new Map<string, ReturnType<typeof robotsParser>>();
+
+async function isAllowedByRobots(url: string, signal?: AbortSignal): Promise<boolean> {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return false;
+  }
+  const origin = `${parsed.protocol}//${parsed.host}`;
+  const robotsUrl = `${origin}/robots.txt`;
+  let robots = robotsCache.get(origin);
+  if (!robots) {
+    try {
+      const res = await fetch(robotsUrl, {
+        headers: { "user-agent": USER_AGENT_TOKEN },
+        signal,
+      });
+      const text = res.ok ? await res.text() : "";
+      robots = robotsParser(robotsUrl, text);
+    } catch {
+      robots = robotsParser(robotsUrl, "");
+    }
+    robotsCache.set(origin, robots);
+  }
+  // robots-parser returns boolean for allow checks; default to true if undefined
+  const decision = robots.isAllowed(url, USER_AGENT_TOKEN);
+  return decision !== false;
+}
+
+export function clearRobotsCache(): void {
+  robotsCache.clear();
+}
 
 const DEFAULT_TIMEOUT_MS = 15_000;
 const MAX_CONTENT_CHARS = 8_000;
@@ -49,15 +86,29 @@ function looksLikelyJsRendered(html: string, extractedChars: number): boolean {
 
 export async function scrape(
   url: string,
-  opts: { timeoutMs?: number; signal?: AbortSignal } = {},
+  opts: { timeoutMs?: number; signal?: AbortSignal; respectRobots?: boolean } = {},
 ): Promise<ScrapedPage> {
   const timeoutMs = opts.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+  const respectRobots = opts.respectRobots ?? true;
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeoutMs);
   if (opts.signal) {
     opts.signal.addEventListener("abort", () => ctrl.abort(), { once: true });
   }
   try {
+    if (respectRobots) {
+      const allowed = await isAllowedByRobots(url, ctrl.signal);
+      if (!allowed) {
+        return {
+          url,
+          status: 0,
+          title: "",
+          content: "",
+          ok: false,
+          reason: "blocked by robots.txt",
+        };
+      }
+    }
     const res = await fetch(url, {
       headers: {
         "user-agent": USER_AGENT,

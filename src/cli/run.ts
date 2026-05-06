@@ -17,6 +17,7 @@ import {
 import { ConfigSchema, type Config, type Provider, type ProviderId } from "../core/types";
 import { executeRun, type PlanItem } from "../core/runner";
 import { OpenAIProvider } from "../providers/openai";
+import { AnthropicProvider } from "../providers/anthropic";
 
 function loadConfig(path: string): Config {
   if (!existsSync(path)) {
@@ -58,19 +59,21 @@ function loadEnvFile(): void {
 function buildProviders(cfg: Config): Map<ProviderId, Provider> {
   const map = new Map<ProviderId, Provider>();
   const wantedIds = new Set(cfg.providers.map((p) => p.id));
-  if (wantedIds.has("openai")) {
+  const tryRegister = (id: ProviderId, factory: () => Provider) => {
     try {
-      map.set("openai", new OpenAIProvider());
+      map.set(id, factory());
     } catch (e) {
       const err = e as { kind?: string; message?: string };
       console.error(`! ${err.message ?? e}`);
       process.exit(1);
     }
-  }
+  };
+  if (wantedIds.has("openai")) tryRegister("openai", () => new OpenAIProvider());
+  if (wantedIds.has("anthropic")) tryRegister("anthropic", () => new AnthropicProvider());
   for (const id of wantedIds) {
-    if (id !== "openai") {
+    if (id !== "openai" && id !== "anthropic") {
       console.error(
-        `! Provider '${id}' is not implemented yet. v0 supports OpenAI only. Coming in v0.1+.`,
+        `! Provider '${id}' is not implemented yet. v0.2 supports OpenAI + Anthropic. Gemini and Perplexity coming.`,
       );
       process.exit(1);
     }

@@ -9,7 +9,7 @@ import { suggestCmd } from "./suggest";
 const main = defineCommand({
   meta: {
     name: "openllmrank",
-    version: "0.1.0",
+    version: "0.2.0",
     description: "Track how your brand appears in answers from AI search providers",
   },
   subCommands: {

@@ -1,5 +1,7 @@
-import { describe, expect, test } from "bun:test";
-import { extract } from "../src/core/scraper";
+import { afterEach, describe, expect, test } from "bun:test";
+import { clearRobotsCache, extract, scrape } from "../src/core/scraper";
+
+afterEach(() => clearRobotsCache());
 
 describe("extract", () => {
   test("returns title from <title>", () => {
@@ -77,5 +79,112 @@ describe("extract", () => {
     const html =
       "<html><body><article><h2>Title</h2><p>Article paragraph one.</p></article></body></html>";
     expect(extract(html).content).toContain("Article paragraph one");
+  });
+});
+
+describe("scrape with robots.txt", () => {
+  const origFetch = globalThis.fetch;
+  let calls: { url: string; init?: RequestInit }[] = [];
+
+  function mockFetch(handlers: Array<(url: string) => Response | Promise<Response> | null>) {
+    globalThis.fetch = (async (input: RequestInfo, init?: RequestInit) => {
+      const url = typeof input === "string" ? input : input.toString();
+      calls.push({ url, init });
+      for (const h of handlers) {
+        const r = await h(url);
+        if (r) return r;
+      }
+      return new Response("default", { status: 200, headers: { "content-type": "text/html" } });
+    }) as typeof fetch;
+  }
+
+  function restore() {
+    globalThis.fetch = origFetch;
+    calls = [];
+  }
+
+  test("blocks fetch when robots.txt disallows path", async () => {
+    mockFetch([
+      (url) =>
+        url.endsWith("/robots.txt")
+          ? new Response("User-agent: *\nDisallow: /private", {
+              status: 200,
+              headers: { "content-type": "text/plain" },
+            })
+          : null,
+    ]);
+    try {
+      const r = await scrape("https://example.test/private/page");
+      expect(r.ok).toBe(false);
+      expect(r.reason).toContain("robots.txt");
+    } finally {
+      restore();
+    }
+  });
+
+  test("allows fetch when robots.txt allows path", async () => {
+    mockFetch([
+      (url) =>
+        url.endsWith("/robots.txt")
+          ? new Response("User-agent: *\nDisallow:", {
+              status: 200,
+              headers: { "content-type": "text/plain" },
+            })
+          : null,
+      (url) =>
+        url.includes("/page")
+          ? new Response("<html><body><main><p>Allowed content here.</p></main></body></html>", {
+              status: 200,
+              headers: { "content-type": "text/html" },
+            })
+          : null,
+    ]);
+    try {
+      const r = await scrape("https://example.test/page");
+      expect(r.ok).toBe(true);
+      expect(r.content).toContain("Allowed content here");
+    } finally {
+      restore();
+    }
+  });
+
+  test("treats missing robots.txt as allowed", async () => {
+    mockFetch([
+      (url) =>
+        url.endsWith("/robots.txt") ? new Response("", { status: 404 }) : null,
+      (url) =>
+        url.includes("/page")
+          ? new Response("<html><body><main><p>OK content.</p></main></body></html>", {
+              status: 200,
+              headers: { "content-type": "text/html" },
+            })
+          : null,
+    ]);
+    try {
+      const r = await scrape("https://example2.test/page");
+      expect(r.ok).toBe(true);
+    } finally {
+      restore();
+    }
+  });
+
+  test("respectRobots: false bypasses the check", async () => {
+    mockFetch([
+      (url) =>
+        url.includes("/page")
+          ? new Response("<html><body><main><p>Bypassed content.</p></main></body></html>", {
+              status: 200,
+              headers: { "content-type": "text/html" },
+            })
+          : null,
+    ]);
+    try {
+      const r = await scrape("https://example3.test/page", { respectRobots: false });
+      expect(r.ok).toBe(true);
+      const robotsCalls = calls.filter((c) => c.url.endsWith("/robots.txt"));
+      expect(robotsCalls).toHaveLength(0);
+    } finally {
+      restore();
+    }
   });
 });

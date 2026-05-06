@@ -10,23 +10,31 @@ const SAMPLE_CONFIG = {
   prompts: [
     "best AI search rank tracking tools",
     "open source alternatives to Ahrefs",
-    "how do I track my brand in ChatGPT",
-    "Acme vs Globex",
-    "problems with AI rank tracking tools",
+    "alternatives to Profound for AI visibility",
+    "how do I rank in ChatGPT answers",
+    "best tools for tracking brand mentions in AI search",
   ],
-  providers: [{ id: "openai", model: "gpt-4o-mini" }],
+  providers: [
+    { id: "openai", model: "gpt-4o-mini" },
+    // Uncomment after adding ANTHROPIC_API_KEY to .env:
+    // { id: "anthropic", model: "claude-haiku-4-5" },
+  ],
   samples_per_prompt: 3,
   concurrency_per_provider: 4,
 };
 
 const SAMPLE_ENV = `# openllmrank API keys
-# Get your key at https://platform.openai.com/api-keys
+# At least one provider key is required.
+
+# OpenAI: https://platform.openai.com/api-keys
 OPENAI_API_KEY=
 
-# Future providers (v0.1+):
+# Anthropic: https://console.anthropic.com/settings/keys
 # ANTHROPIC_API_KEY=
-# GOOGLE_API_KEY=
-# PERPLEXITY_API_KEY=
+
+# Coming in future releases:
+# GOOGLE_API_KEY=     (Gemini)
+# PERPLEXITY_API_KEY= (Perplexity sonar)
 `;
 
 export const initCmd = defineCommand({

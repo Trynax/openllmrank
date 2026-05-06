@@ -1,20 +1,33 @@
 # openllmrank
 
-> Track how your brand appears in answers from ChatGPT, Claude, Gemini, and Perplexity.
-> Open source. Self-hosted. Bring your own API keys.
+[![npm](https://img.shields.io/npm/v/openllmrank.svg)](https://www.npmjs.com/package/openllmrank)
+[![license](https://img.shields.io/npm/l/openllmrank.svg)](./LICENSE)
+[![tests](https://img.shields.io/badge/tests-115%20passing-brightgreen)](./test)
 
-**The problem.** When users ask AI tools for product recommendations, your brand either gets cited or it doesn't. Existing AI-search-visibility tools (Profound, Athena HQ, Brand Radar) cost $200–$1000/month. You can do it yourself for the cost of API calls.
+> **AI-search-visibility tracking that costs $5/month instead of $500/month.**
+> Self-hosted CLI. Bring your own API keys. The Plausible of AI search.
 
-**The pitch.** A 30-second install. Define your brand, your competitors, and a list of prompts users would actually search. `openllmrank run` queries the AI APIs with web search enabled, parses citations, and writes a gap-analysis report showing where competitors get cited and you don't.
+**The problem.** When users ask AI tools for product recommendations, your brand either gets cited or it doesn't. Existing AI-search-visibility tools (Profound, Athena HQ, Brand Radar) cost $200–$1,000/month. You can do this yourself for the cost of a few API calls a week.
+
+**The pitch.** A 30-second install. Define your brand, your competitors, and a list of prompts users would actually search. `openllmrank run` queries grounded LLM APIs with web search enabled, parses citations, and writes:
+
+- A **gap-analysis report** showing prompts where competitors get cited and you don't
+- A **suggestions report** that fetches the winning competitor's actual page and produces specific content recommendations to close the gap
+
+Run it weekly. Watch the numbers move as you ship content.
 
 ## Status
 
-**v0.1** — OpenAI only (Responses API with web_search) + the new `suggest` command. Anthropic, Gemini, Perplexity to follow.
+**v0.2** — OpenAI Responses API + Anthropic Messages API, both with web search. Gemini and Perplexity adapters coming. PRs welcome (see [CONTRIBUTING.md](./CONTRIBUTING.md)).
 
 ## Requirements
 
-- [Bun](https://bun.sh) 1.3 or later (the CLI is a TypeScript file executed by Bun; Node is not supported in v0).
-- An OpenAI API key with billing/credit (the v0 provider). Get one at https://platform.openai.com/api-keys.
+- [Bun](https://bun.sh) 1.3 or later (the CLI is a TypeScript file executed by Bun; Node is not supported yet).
+- An OpenAI API key with billing/credit ([create one](https://platform.openai.com/api-keys)). Optional: an Anthropic API key ([create one](https://console.anthropic.com/settings/keys)) to also query Claude.
+
+## Cost expectation
+
+A typical run with default config (5 prompts × 1 provider × N=3 samples = 15 grounded calls) costs **about $0.30 with OpenAI's `gpt-4o-mini` + web_search**. Two providers doubles it. Running once a week means **~$1-3/month per tracked brand**. Compare to $200-1000/month for hosted alternatives.
 
 ## Install
 

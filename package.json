@@ -1,6 +1,6 @@
 {
   "name": "openllmrank",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Open source CLI to track how your brand appears in answers from ChatGPT, Claude, Gemini, and Perplexity. The Plausible of AI search visibility.",
   "type": "module",
   "license": "MIT",
@@ -19,7 +19,9 @@
   "files": [
     "src",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "CHANGELOG.md",
+    "CONTRIBUTING.md"
   ],
   "scripts": {
     "start": "bun run src/cli/index.ts",
@@ -29,11 +31,13 @@
     "prepublishOnly": "bun test && tsc --noEmit"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.94.0",
     "cheerio": "^1.2.0",
     "citty": "^0.1.6",
     "cli-progress": "^3.12.0",
     "openai": "^4.83.0",
     "p-limit": "^6.1.0",
+    "robots-parser": "^3.0.1",
     "zod": "^3.24.0"
   },
   "devDependencies": {
