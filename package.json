@@ -14,7 +14,7 @@
     "url": "https://github.com/foodaka/openllmrank/issues"
   },
   "bin": {
-    "openllmrank": "./src/cli/index.ts"
+    "openllmrank": "src/cli/index.ts"
   },
   "files": [
     "src",
