@@ -1,7 +1,7 @@
 # openllmrank
 
 [![npm](https://img.shields.io/npm/v/openllmrank.svg)](https://www.npmjs.com/package/openllmrank)
-[![license](https://img.shields.io/npm/l/openllmrank.svg)](./LICENSE)
+[![license](https://img.shields.io/npm/l/openllmrank.svg)](../../LICENSE)
 [![tests](https://img.shields.io/badge/tests-passing-brightgreen)](./test)
 
 > **AI-search-visibility tracking that costs $5/month instead of $500/month.**
@@ -20,16 +20,24 @@ Run it weekly. Watch the numbers move as you ship content.
 
 ## Status
 
-**v0.2** — OpenAI Responses API + Anthropic Messages API, both with web search. Gemini and Perplexity adapters coming. PRs welcome (see [CONTRIBUTING.md](./CONTRIBUTING.md)).
+**v0.3.0** — Five grounded providers: OpenAI, Anthropic, Google Gemini, Perplexity Sonar, and xAI Grok. PRs welcome (see [CONTRIBUTING.md](./CONTRIBUTING.md)).
 
 ## Requirements
 
 - [Bun](https://bun.sh) 1.3 or later (the CLI is a TypeScript file executed by Bun; Node is not supported yet).
-- An OpenAI API key with billing/credit ([create one](https://platform.openai.com/api-keys)). Optional: an Anthropic API key ([create one](https://console.anthropic.com/settings/keys)) to also query Claude.
+- A key with billing enabled for at least one supported provider. `openllmrank init` writes links and environment-variable names for all five.
+
+| Provider | Default model | Environment variable |
+|---|---|---|
+| OpenAI | `gpt-5.4-mini` | `OPENAI_API_KEY` |
+| Anthropic | `claude-haiku-4-5` | `ANTHROPIC_API_KEY` |
+| Google Gemini | `gemini-3.5-flash` | `GOOGLE_API_KEY` |
+| Perplexity | `sonar` | `PERPLEXITY_API_KEY` |
+| xAI Grok | `grok-4.3` | `XAI_API_KEY` |
 
 ## Cost expectation
 
-A typical run with default config (5 prompts × 1 provider × N=3 samples = 15 grounded calls) costs **about $0.40-$0.50 with OpenAI's `gpt-4o-mini` + web_search**. The web-search tool fee dominates over token cost; the per-call fee is roughly $0.025. Two providers doubles it. Running once a week means **~$2-5/month per tracked brand**. Compare to $200-1000/month for hosted alternatives.
+Cost depends on the provider, model, response length, and number of search operations. A default run is 5 prompts × 1 provider × 3 samples = 15 grounded calls. The CLI records estimated cost per call; Perplexity&rsquo;s adapter uses the API&rsquo;s returned total when available. Check provider pricing before large runs because prices and included search quotas change.
 
 ## Install
 
@@ -48,6 +56,7 @@ From source (for development):
 git clone https://github.com/foodaka/openllmrank.git
 cd openllmrank
 bun install
+cd packages/cli
 bun link
 ```
 
@@ -74,7 +83,7 @@ open gap-report.html suggestions.md
 | `openllmrank run --resume` | Resume the previous unfinished run from where it crashed |
 | `openllmrank run --retry-failed` | Re-query just the failed rows from the latest run |
 | `openllmrank report` | Generate `gap-report.md` from the rolling 7-day window |
-| `openllmrank report --html` | Generate a self-contained `gap-report.html` with no CDN, font, CSS, or JS dependencies |
+| `openllmrank report --html` | Generate a single-file `gap-report.html` (fonts enhance over the network when available) |
 | `openllmrank suggest` | **NEW.** For each losing prompt, fetch the winning competitor's cited URL and your brand URL, and produce specific content recommendations |
 | `openllmrank export --since 7d` | Emit raw calls + citations as NDJSON for piping to `jq`/spreadsheets |
 
@@ -87,7 +96,7 @@ openllmrank report --html
 openllmrank report --html --output weekly-ai-visibility.html
 ```
 
-It includes the AI visibility score, trend versus the previous run, the losing gap table with expandable raw responses, winning prompts, provider breakdowns, run-history sparklines, and total run cost. See [examples/sample-report.html](./examples/sample-report.html).
+It includes the AI visibility score, coverage and partial-failure disclosure, prioritized actions with captured source evidence, the losing gap table with expandable raw responses, winning prompts, provider breakdowns, run-history sparklines, and methodology limits. See [examples/sample-report.html](./examples/sample-report.html).
 
 ![Sample openllmrank HTML report](./examples/sample-report-screenshot.png)
 
@@ -121,6 +130,10 @@ JS-rendered sites: if a fetched page returns < 200 chars of extractable content 
 2. `openllmrank run` queries each prompt against each provider with web search enabled, N times for sample variance.
 3. Results are stored in a local SQLite database with content-addressed prompt IDs (so editing a prompt creates a new tracking series rather than corrupting old data).
 4. `openllmrank report` generates a markdown gap-analysis: prompts where competitors are cited but you are not.
+
+## Methodology limit
+
+The CLI queries provider APIs with web search. Those results are reproducible directional benchmarks, but they are not guaranteed to match the consumer ChatGPT, Claude, Gemini, Perplexity, or Grok apps. Consumer products can use different model versions, system instructions, rollouts, and personalization. Reports disclose the configured provider/model identifiers and successful-call coverage so you can judge the evidence.
 
 ## Choosing good prompts
 

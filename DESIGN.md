@@ -7,7 +7,7 @@
 
 ## Product Context
 
-- **What this is:** Hosted AI-search-visibility report. A one-time $29.99 product that runs ChatGPT and Claude against the buyer's category prompts and ships a personalized editorial report on where their brand appears (or doesn't) vs. competitors.
+- **What this is:** Hosted AI-search-visibility report. A one-time $29.99 product that repeatedly queries grounded provider APIs against the buyer's category prompts and ships a personalized editorial report on where their brand appears (or doesn't) vs. competitors, with evidence and prioritized actions.
 - **Who it's for:** Marketing / growth leads at 50-500 person SaaS companies. They have $50-500/mo discretionary budget, can't (and shouldn't need to) run a CLI, and care about being cited by AI tools the way they used to care about SEO.
 - **Space:** AI search visibility / "GEO" / brand citation tracking. Hosted peers: Profound, Athena HQ, Brand Radar ($200-1000/mo).
 - **Project type:** Hybrid. (1) Marketing landing page. (2) Four-step signup wizard. (3) Stripe checkout + success / cancel pages. (4) Two transactional emails (order-received + report). The full report HTML is itself a product surface.
@@ -53,7 +53,7 @@ Every design decision serves this. When you have to choose between two options, 
 
 - **Approach:** Restrained-balanced. One moss accent for action + identity. One terra-cotta accent for emphasis. Earth-tone neutrals.
 
-### Tokens (single source of truth: `packages/shared/src/design-tokens.{ts,css}` and `packages/cli/src/core/render-html.ts` line 84)
+### Tokens (single source of truth: `packages/shared/src/design-tokens.{ts,css}` and the inline stylesheet in `packages/cli/src/core/render-html.ts`)
 
 | Token | Hex | Role |
 |-------|-----|------|
@@ -207,7 +207,7 @@ These patterns are explicitly forbidden in any new code. If a contributor or AI 
 
 | Date | Decision | Rationale |
 |------|----------|-----------|
-| 2026-05-06 | Editorial Georgia + warm-paper palette established in CLI's HTML report renderer | Felt right for an "investigative" report; differentiates from SaaS-default rendering. See `packages/cli/src/core/render-html.ts` line 84. |
+| 2026-05-06 | Editorial Georgia + warm-paper palette established in CLI's HTML report renderer | Felt right for an "investigative" report; differentiates from SaaS-default rendering. See the inline stylesheet in `packages/cli/src/core/render-html.ts`. |
 | 2026-05-17 | System extended across the hosted webapp via `packages/shared/src/design-tokens.{ts,css}` | Single source of truth across CLI report, web pages, and emails. Locked by /plan-design-review. |
 | 2026-05-17 | System sans for body in v1; web-font upgrade deferred to v1.1 | Ops simplicity for v1; Georgia carries the brand. Web-font hosting is a separable polish task. |
 | 2026-05-17 | Dark mode deferred to v2 | Warm-paper is the v1 identity. Dark mode is a separate design system pass, not a token inversion. |
@@ -224,7 +224,7 @@ These patterns are explicitly forbidden in any new code. If a contributor or AI 
 |---------|----------------|
 | CSS variables (used by the web app) | `packages/shared/src/design-tokens.css` |
 | TS exports (for programmatic use) | `packages/shared/src/design-tokens.ts` |
-| Inline CSS in the report renderer | `packages/cli/src/core/render-html.ts` (line 84) |
+| Inline CSS in the report renderer | `packages/cli/src/core/render-html.ts` |
 | Web layout styles | `packages/web/styles/globals.css` |
 | Approved mockups | `~/.gstack/projects/foodaka-openllmrank/designs/` |
 | Original design doc with rationale | `~/.gstack/projects/foodaka-openllmrank/markhinschberger-main-design-20260517-183514.md` |
