@@ -33,7 +33,7 @@ export default function HomePage() {
             </h1>
             <p className="hero-sub">
               We run the buying questions your customers actually type through
-              grounded OpenAI and Anthropic APIs, watch what they recommend,
+              five grounded AI APIs, watch what they recommend,
               and ship a $29.99 report showing where you&rsquo;re losing visibility
               and what to do next.
             </p>
@@ -45,6 +45,31 @@ export default function HomePage() {
                 See a sample report
               </a>
             </p>
+            <div className="report-providers" aria-label="Providers included in every report">
+              <span className="kicker">Included in every report</span>
+              <ul>
+                <li>
+                  <img className="provider-logo" src="/providers/openai.svg" alt="" width="24" height="24" />
+                  <strong>OpenAI</strong>
+                </li>
+                <li>
+                  <img className="provider-logo" src="/providers/anthropic.svg" alt="" width="24" height="24" />
+                  <strong>Anthropic</strong>
+                </li>
+                <li>
+                  <img className="provider-logo" src="/providers/google-gemini.svg" alt="" width="24" height="24" />
+                  <strong>Google Gemini</strong>
+                </li>
+                <li>
+                  <img className="provider-logo" src="/providers/perplexity.svg" alt="" width="24" height="24" />
+                  <strong>Perplexity</strong>
+                </li>
+                <li>
+                  <img className="provider-logo" src="/providers/xai.svg" alt="" width="24" height="24" />
+                  <strong>xAI Grok</strong>
+                </li>
+              </ul>
+            </div>
           </div>
 
           <aside className="hero-sample" aria-label="Sample report data">
@@ -98,7 +123,8 @@ export default function HomePage() {
               <h3>We run a repeatable test</h3>
               <p>
                 Behind the scenes we run each prompt three times through current
-                OpenAI and Anthropic API models with web search, capture every
+                OpenAI, Anthropic, Google Gemini, Perplexity, and xAI Grok
+                models with web search, capture every
                 answer, and extract every brand citation. No spreadsheets. No screenshots.
               </p>
             </article>
@@ -273,6 +299,38 @@ export default function HomePage() {
           gap: 16px;
           align-items: center;
         }
+        .report-providers {
+          margin-top: 32px;
+          padding-top: 20px;
+          border-top: 1px solid var(--line);
+          max-width: 620px;
+        }
+        .report-providers ul {
+          list-style: none;
+          margin: 12px 0 0;
+          padding: 0;
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 8px 24px;
+        }
+        .report-providers li {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          min-width: 0;
+          min-height: 36px;
+        }
+        .provider-logo {
+          display: block;
+          width: 22px;
+          height: 22px;
+          flex: 0 0 22px;
+        }
+        .report-providers strong {
+          font-family: var(--font-display);
+          font-size: 20px;
+          font-weight: 500;
+        }
         .hero-sample {
           background: var(--soft);
           border: 1px solid var(--line);
@@ -367,6 +425,7 @@ export default function HomePage() {
           }
           .hero-headline { font-size: 44px; }
           .hero-actions { flex-direction: column; align-items: flex-start; }
+          .report-providers ul { grid-template-columns: repeat(2, minmax(0, 1fr)); }
           .btn-primary { width: 100%; text-align: center; }
           .site-nav-links { display: none; }
           .section-headline { font-size: 32px; }
