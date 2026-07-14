@@ -22,7 +22,7 @@ export default function PrivacyPage() {
         <article className="wrap legal">
           <span className="kicker">Privacy Policy</span>
           <h1>Privacy Policy</h1>
-          <p className="muted updated">Last updated: May 19, 2026</p>
+          <p className="muted updated">Last updated: July 14, 2026</p>
 
           <p>
             openllmrank (&ldquo;we,&rdquo; &ldquo;us&rdquo;) operates the
@@ -43,7 +43,8 @@ export default function PrivacyPage() {
               <strong>Brand information</strong> &mdash; the brand name,
               website, category, competitor names, and buying questions you
               provide through the signup wizard. This is the input we send
-              to grounded OpenAI and Anthropic APIs on your behalf.
+              to grounded OpenAI, Anthropic, Google Gemini, Perplexity,
+              and xAI Grok APIs on your behalf.
             </li>
             <li>
               <strong>Payment information</strong> &mdash; collected
@@ -85,10 +86,10 @@ export default function PrivacyPage() {
               delivery (your report and receipts).
             </li>
             <li>
-              <strong>OpenAI</strong> and <strong>Anthropic</strong>{" "}
+              <strong>OpenAI, Anthropic, Google, Perplexity, and xAI</strong>{" "}
               &mdash; we send your prompts (the buying questions you
               provide) to their APIs to generate the analysis. We do not
-              send your email or payment information to either.
+              send your email or payment information to them.
             </li>
             <li>
               <strong>Supabase</strong> &mdash; managed Postgres for

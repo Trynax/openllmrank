@@ -22,7 +22,7 @@ export default function TermsPage() {
         <article className="wrap legal">
           <span className="kicker">Terms of Service</span>
           <h1>Terms of Service</h1>
-          <p className="muted updated">Last updated: May 19, 2026</p>
+          <p className="muted updated">Last updated: July 14, 2026</p>
 
           <p>
             These Terms of Service (&ldquo;Terms&rdquo;) govern your use
@@ -37,7 +37,8 @@ export default function TermsPage() {
           <p>
             openllmrank generates an AI-search visibility report that
             measures how often the brand you specify is cited by
-            grounded OpenAI and Anthropic APIs in response to buying
+            grounded OpenAI, Anthropic, Google Gemini, Perplexity, and
+            xAI Grok APIs in response to buying
             questions you provide. The report is delivered by email, typically within
             fifteen minutes of payment.
           </p>
@@ -81,7 +82,8 @@ export default function TermsPage() {
           <p>
             <strong>
               The Service generates analysis using third-party large
-              language-model APIs (OpenAI and Anthropic) and their web
+              language-model APIs (OpenAI, Anthropic, Google Gemini,
+              Perplexity, and xAI Grok) and their web
               search tools. API output can differ from the providers&rsquo;
               consumer apps. Outputs are probabilistic and may contain factual
               errors, hallucinated citations, or out-of-date

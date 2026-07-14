@@ -29,6 +29,14 @@ export const ProviderConfigSchema = z.object({
 });
 export type ProviderConfig = z.infer<typeof ProviderConfigSchema>;
 
+export const HOSTED_REPORT_PROVIDERS: readonly ProviderConfig[] = [
+  { id: "openai", model: "gpt-5.4-mini" },
+  { id: "anthropic", model: "claude-haiku-4-5" },
+  { id: "google", model: "gemini-3.5-flash" },
+  { id: "perplexity", model: "sonar" },
+  { id: "xai", model: "grok-4.3" },
+];
+
 export const ConfigSchema = z.object({
   brand: BrandSchema,
   competitors: z.array(BrandSchema).default([]),
@@ -42,7 +50,7 @@ export type Config = z.infer<typeof ConfigSchema>;
 export const HOSTED_CAPS = {
   max_prompts: 10,
   max_samples_per_prompt: 3,
-  max_providers: 2,
+  max_providers: HOSTED_REPORT_PROVIDERS.length,
 } as const;
 
 export const HostedConfigSchema = ConfigSchema.extend({

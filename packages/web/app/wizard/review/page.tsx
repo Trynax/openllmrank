@@ -11,6 +11,14 @@ import {
 } from "@/lib/wizard-state";
 import { HostedConfigSchema } from "@openllmrank/shared/config";
 
+const PROVIDER_NAMES: Record<string, string> = {
+  openai: "OpenAI",
+  anthropic: "Anthropic",
+  google: "Google Gemini",
+  perplexity: "Perplexity",
+  xai: "xAI Grok",
+};
+
 export default function WizardReviewPage() {
   const router = useRouter();
   const [state, setState] = useState<WizardState | null>(null);
@@ -159,6 +167,14 @@ export default function WizardReviewPage() {
           <dt>Prompts</dt>
           <dd>
             {promptCount} {promptCount === 1 ? "prompt" : "prompts"}
+          </dd>
+        </div>
+        <div>
+          <dt>Providers</dt>
+          <dd>
+            {state.providers
+              .map((provider) => PROVIDER_NAMES[provider.id] ?? provider.id)
+              .join(" and ")}
           </dd>
         </div>
         <div>

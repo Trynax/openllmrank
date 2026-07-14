@@ -2,7 +2,7 @@
 
 > Privacy-friendly, open-source analytics for AI search visibility. We repeatedly query grounded provider APIs with buying questions, measure brand and competitor citations, and deliver a one-time $29.99 emailed report with evidence and prioritized actions.
 
-openllmrank is a hosted product plus an MIT-licensed CLI. The hosted product queries OpenAI and Anthropic APIs. The open-source CLI supports OpenAI, Anthropic, Google Gemini, Perplexity, and xAI Grok with bring-your-own API keys.
+openllmrank is a hosted product plus an MIT-licensed CLI. Both support grounded OpenAI, Anthropic, Google Gemini, Perplexity, and xAI Grok APIs; the CLI uses bring-your-own API keys.
 
 ## Core pages
 

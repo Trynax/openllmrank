@@ -11,6 +11,7 @@ import type {
   Brand,
   ProviderConfig,
 } from "@openllmrank/shared/config";
+import { HOSTED_REPORT_PROVIDERS } from "@openllmrank/shared/config";
 
 export type WizardState = {
   brand?: Brand;
@@ -25,10 +26,7 @@ const STORAGE_KEY = "openllmrank.wizard.v1";
 const empty: WizardState = {
   competitors: [],
   prompts: [],
-  providers: [
-    { id: "openai", model: "gpt-5.4-mini" },
-    { id: "anthropic", model: "claude-haiku-4-5" },
-  ],
+  providers: HOSTED_REPORT_PROVIDERS.map((provider) => ({ ...provider })),
 };
 
 export function readWizardState(): WizardState {
@@ -36,7 +34,13 @@ export function readWizardState(): WizardState {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return empty;
-    return { ...empty, ...JSON.parse(raw) };
+    return {
+      ...empty,
+      ...JSON.parse(raw),
+      // Provider selection is part of the hosted product, not a wizard input.
+      // Normalize old saved sessions to the current report lineup.
+      providers: HOSTED_REPORT_PROVIDERS.map((provider) => ({ ...provider })),
+    };
   } catch {
     return empty;
   }

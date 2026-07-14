@@ -91,6 +91,9 @@ describe("HostedConfigSchema (wizard cap enforcement)", () => {
         { id: "openai" as const, model: "gpt-4o-mini" },
         { id: "anthropic" as const, model: "claude-3-5-sonnet" },
         { id: "google" as const, model: "gemini-pro" },
+        { id: "perplexity" as const, model: "sonar" },
+        { id: "xai" as const, model: "grok-4.3" },
+        { id: "openai" as const, model: "gpt-4o-mini" },
       ],
     };
     expect(HostedConfigSchema.safeParse(tooMany).success).toBe(false);
@@ -107,6 +110,9 @@ describe("HostedConfigSchema (wizard cap enforcement)", () => {
       providers: [
         { id: "openai" as const, model: "gpt-4o-mini" },
         { id: "anthropic" as const, model: "claude-3-5-sonnet" },
+        { id: "google" as const, model: "gemini-pro" },
+        { id: "perplexity" as const, model: "sonar" },
+        { id: "xai" as const, model: "grok-4.3" },
       ],
     };
     expect(HostedConfigSchema.safeParse(atCap).success).toBe(true);

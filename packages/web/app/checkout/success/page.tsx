@@ -87,7 +87,7 @@ function CheckoutSuccessInner() {
         <h1>Your report is being generated.</h1>
         <p className="lede">
           A confirmation just landed in your inbox. We&rsquo;re now sending the
-          questions you gave us to grounded OpenAI and Anthropic APIs. Expect the report by
+          questions you gave us across five grounded AI providers. Expect the report by
           email in about fifteen minutes.
         </p>
 

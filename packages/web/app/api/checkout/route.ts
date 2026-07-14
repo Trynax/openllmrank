@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { HostedConfigSchema } from "@openllmrank/shared/config";
+import {
+  HostedConfigSchema,
+  HOSTED_REPORT_PROVIDERS,
+} from "@openllmrank/shared/config";
 import { serviceClient } from "@/lib/supabase-server";
 import { createCheckoutSession, isLocalStub } from "@/lib/stripe";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
@@ -68,7 +71,13 @@ export async function POST(req: Request) {
     );
   }
 
-  const { config, email } = parsed.data;
+  const { email } = parsed.data;
+  // The provider lineup is a server-owned product decision. Do not trust
+  // browser storage to choose which providers a paid report receives.
+  const config = {
+    ...parsed.data.config,
+    providers: HOSTED_REPORT_PROVIDERS.map((provider) => ({ ...provider })),
+  };
   const supabase = serviceClient();
 
   // 1. Insert a lead row. Captures the wizard payload so we can recover
