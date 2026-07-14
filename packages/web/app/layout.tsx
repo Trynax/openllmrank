@@ -12,7 +12,7 @@ const GOOGLE_FONTS_HREF =
   "&family=DM+Sans:wght@400;500;600;700" +
   "&display=swap";
 
-const SITE_URL = "https://openllmrank.xyz";
+const SITE_URL = "https://openllmrank.io";
 const SITE_NAME = "openllmrank";
 const SITE_DESCRIPTION =
   "A repeatable AI-search visibility benchmark across five grounded AI providers, with competitor evidence and a prioritized action plan. One emailed report, $29.99.";

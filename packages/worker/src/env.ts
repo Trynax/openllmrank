@@ -83,7 +83,7 @@ function build(): EnvShape {
       | "local_stub"
       | "live",
     postmarkToken: optional("POSTMARK_SERVER_TOKEN"),
-    postmarkFrom: optional("POSTMARK_FROM", "report@openllmrank.xyz"),
+    postmarkFrom: optional("POSTMARK_FROM", "report@openllmrank.io"),
     postmarkFromName: optional("POSTMARK_FROM_NAME", "openllmrank"),
     postmarkReplyTo: optional("POSTMARK_REPLY_TO"),
     reportBaseUrl: optional(

@@ -6,11 +6,11 @@ openllmrank is a hosted product plus an MIT-licensed CLI. Both support grounded 
 
 ## Core pages
 
-- [Home](https://openllmrank.xyz/): What the report measures, how it works, sample, FAQ, pricing.
-- [Sample report](https://openllmrank.xyz/sample-report.html): A real (anonymized) report so you can see exactly what gets delivered.
-- [Wizard — start a report](https://openllmrank.xyz/wizard/brand): Three-minute signup. Enter brand, competitors, and buying questions.
-- [Terms of Service](https://openllmrank.xyz/terms): Service terms, refund policy, AI-output disclaimer, governing law.
-- [Privacy Policy](https://openllmrank.xyz/privacy): What we collect, who we share it with, retention, user rights.
+- [Home](https://openllmrank.io/): What the report measures, how it works, sample, FAQ, pricing.
+- [Sample report](https://openllmrank.io/sample-report.html): A real (anonymized) report so you can see exactly what gets delivered.
+- [Wizard — start a report](https://openllmrank.io/wizard/brand): Three-minute signup. Enter brand, competitors, and buying questions.
+- [Terms of Service](https://openllmrank.io/terms): Service terms, refund policy, AI-output disclaimer, governing law.
+- [Privacy Policy](https://openllmrank.io/privacy): What we collect, who we share it with, retention, user rights.
 
 ## How the report is generated
 
@@ -27,4 +27,4 @@ openllmrank is a hosted product plus an MIT-licensed CLI. Both support grounded 
 
 ## Contact
 
-- Reach us via the contact form on any page of openllmrank.xyz.
+- Reach us via the contact form on any page of openllmrank.io.

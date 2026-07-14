@@ -26,7 +26,7 @@ export default function PrivacyPage() {
 
           <p>
             openllmrank (&ldquo;we,&rdquo; &ldquo;us&rdquo;) operates the
-            website at openllmrank.xyz and the related AI-search visibility
+            website at openllmrank.io and the related AI-search visibility
             report service. This policy explains what we collect, why, who
             we share it with, and what rights you have. We do not sell your
             personal data to anyone, ever.
@@ -147,7 +147,7 @@ export default function PrivacyPage() {
 
           <h2>7. Security</h2>
           <p>
-            All traffic to openllmrank.xyz is served over HTTPS. Payment
+            All traffic to openllmrank.io is served over HTTPS. Payment
             information is handled by Stripe and never touches our
             servers. Database access is restricted to our worker
             processes via short-lived credentials.

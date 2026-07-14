@@ -7,7 +7,7 @@
 > **AI-search-visibility tracking that costs $5/month instead of $500/month.**
 > Self-hosted CLI. Bring your own API keys. The Plausible of AI search.
 
-Don't want to install the CLI? Run it as a one-shot hosted report at **[openllmrank.xyz](https://openllmrank.xyz)**.
+Don't want to install the CLI? Run it as a one-shot hosted report at **[openllmrank.io](https://openllmrank.io)**.
 
 **The problem.** When users ask AI tools for product recommendations, your brand either gets cited or it doesn't. Existing AI-search-visibility tools (Profound, Athena HQ, Brand Radar) cost $200–$1,000/month. You can do this yourself for the cost of a few API calls a week.
 

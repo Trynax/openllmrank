@@ -26,7 +26,7 @@ export default function TermsPage() {
 
           <p>
             These Terms of Service (&ldquo;Terms&rdquo;) govern your use
-            of openllmrank.xyz (the &ldquo;Service&rdquo;), operated by
+            of openllmrank.io (the &ldquo;Service&rdquo;), operated by
             openllmrank (&ldquo;we,&rdquo; &ldquo;us&rdquo;). By
             purchasing a report or otherwise using the Service, you
             agree to these Terms. If you do not agree, do not use the
@@ -134,7 +134,7 @@ export default function TermsPage() {
             </a>{" "}
             under the MIT license. The CLI is governed by its own
             license; these Terms apply only to the hosted Service at
-            openllmrank.xyz.
+            openllmrank.io.
           </p>
 
           <h2>7. Intellectual property</h2>
@@ -196,7 +196,7 @@ export default function TermsPage() {
           <h2>13. Changes to these Terms</h2>
           <p>
             We may update these Terms from time to time. The current
-            version is always at openllmrank.xyz/terms with the date at
+            version is always at openllmrank.io/terms with the date at
             the top. Material changes will be emailed to customers who
             have placed an order in the last twelve months.
           </p>

@@ -111,7 +111,7 @@ export default async function OGImage() {
                 "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
             }}
           >
-            openllmrank.xyz
+            openllmrank.io
           </div>
           <div
             style={{
