@@ -19,6 +19,9 @@ export default function HomePage() {
             <a href="#sample">Sample report</a>
           </li>
           <li>
+            <Link href="/blog">Blog</Link>
+          </li>
+          <li>
             <a href="#faq">FAQ</a>
           </li>
         </ul>
@@ -236,6 +239,7 @@ export default function HomePage() {
         <footer className="wrap site-footer">
           <span className="muted">
             openllmrank &middot; Privacy-friendly, open-source analytics for AI search visibility &middot;{" "}
+            <Link href="/blog">Blog</Link> &middot;{" "}
             <Link href="/privacy">Privacy</Link> &middot;{" "}
             <Link href="/terms">Terms</Link> &middot;{" "}
             <ContactLink>Contact</ContactLink> &middot;{" "}
