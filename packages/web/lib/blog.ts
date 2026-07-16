@@ -27,6 +27,47 @@ export interface BlogPost {
 
 export const posts: BlogPost[] = [
   {
+    slug: "state-of-ai-search-2026",
+    title:
+      "State of AI Search 2026: We Asked 5 AI Engines to Recommend Software",
+    description:
+      "We ran 10 buying questions through ChatGPT, Claude, Gemini, Perplexity, and Grok — 3 times each, 150 grounded answers — and counted every brand they named. Every category had a locked shortlist, well-known challengers flickered, and 11 real brands were never named once.",
+    date: "2026-07-16",
+    dateModified: "2026-07-16",
+    readingTime: "11 min read",
+    tags: ["Data", "AI Search", "Research", "AEO"],
+    keywords: [
+      "state of ai search",
+      "ai search visibility study",
+      "what does chatgpt recommend",
+      "ai brand recommendations data",
+      "which brands does ai recommend",
+      "ai search benchmark",
+      "chatgpt vs perplexity recommendations",
+      "generative engine optimization research",
+    ],
+  },
+  {
+    slug: "which-sources-do-ai-engines-cite",
+    title: "Which Sources Do AI Engines Cite When Recommending Software?",
+    description:
+      "Across 150 grounded AI answers, we logged every source the engines cited. The pattern is clear: AI recommendations run downstream of review sites, listicles, and niche blogs — not your own homepage. Here are the domains that get cited most.",
+    date: "2026-07-16",
+    dateModified: "2026-07-16",
+    readingTime: "7 min read",
+    tags: ["Data", "Sources", "AI Search", "AEO"],
+    keywords: [
+      "what sources does ai cite",
+      "ai citations sources",
+      "which websites does chatgpt cite",
+      "perplexity sources",
+      "get cited by ai",
+      "g2 ai citations",
+      "ai search sources study",
+      "how ai picks sources",
+    ],
+  },
+  {
     slug: "what-is-aeo",
     title: "What Is AEO (Answer Engine Optimization)?",
     description:
@@ -122,10 +163,20 @@ export function getAllPosts(): BlogPost[] {
 // Curated related links per post. Unknown slugs are filtered out, so it is safe
 // to reference posts before they exist — they simply won't render until added.
 const RELATED: Record<string, string[]> = {
-  "what-is-aeo": [
-    "geo-vs-seo-vs-aeo",
+  "state-of-ai-search-2026": [
+    "which-sources-do-ai-engines-cite",
     "how-to-get-mentioned-in-chatgpt",
     "best-ai-search-visibility-tools",
+  ],
+  "which-sources-do-ai-engines-cite": [
+    "state-of-ai-search-2026",
+    "how-to-get-mentioned-in-chatgpt",
+    "what-is-aeo",
+  ],
+  "what-is-aeo": [
+    "state-of-ai-search-2026",
+    "geo-vs-seo-vs-aeo",
+    "how-to-get-mentioned-in-chatgpt",
   ],
   "geo-vs-seo-vs-aeo": [
     "what-is-aeo",
