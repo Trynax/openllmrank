@@ -32,8 +32,8 @@ type PendingRefundRow = {
   brand_name: string;
 };
 
-// Only one-shot purchases can be refunded. Keep the checkout-session fallback
-// below for one-shot async payment methods whose payment intent arrives late.
+// Only one-shot purchases with a payment intent can be refunded. Jobs without
+// one are left for a later reconciliation path instead of being selected here.
 export async function fetchPendingRefunds(sql: SQL): Promise<PendingRefundRow[]> {
   return (await sql`
     select j.id, j.user_id, j.brand_id, j.origin, j.email_to, j.amount_cents, j.currency,
@@ -44,7 +44,7 @@ export async function fetchPendingRefunds(sql: SQL): Promise<PendingRefundRow[]>
     join public.brands b on b.id = j.brand_id
     where j.refund_status = 'pending'
       and j.origin = 'one_shot'
-      and (j.stripe_payment_intent_id is not null or j.stripe_checkout_session_id is not null)
+      and j.stripe_payment_intent_id is not null
       and j.refund_attempts < ${REFUND_MAX_ATTEMPTS}
     order by j.failed_at asc
     limit 10
