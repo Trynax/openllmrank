@@ -68,7 +68,9 @@ export default async function RunsPage({
                     {job.status === "completed" ? (
                       <Link href={`/reports/${job.id}`}>Read</Link>
                     ) : job.status === "failed" ? (
-                      "Failed"
+                      job.origin === "one_shot"
+                        ? "Failed"
+                        : "Run failed, we are looking into it"
                     ) : (
                       "Running"
                     )}
