@@ -72,6 +72,8 @@ async function processOneJob(job: Job): Promise<void> {
       user_id: job.user_id,
       brand_id: job.brand_id,
       cli_run_id: result.run_id,
+      brand_name: job.config_jsonb.brand.name,
+      competitor_names: job.config_jsonb.competitors.map((competitor) => competitor.name),
     });
   } catch (e) {
     result.cleanup();
