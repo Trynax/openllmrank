@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { ServerClient as PostmarkClient } from "postmark";
 import { serviceClient } from "@/lib/supabase-server";
 import { verifyWebhook } from "@/lib/stripe";
+import { sendAccountInviteEmail } from "@/lib/account-invite";
 import { HostedConfigSchema, type HostedConfig } from "@openllmrank/shared/config";
 
 // Stripe webhook handler. Post-payment provisioning lives here. Flow:
@@ -47,7 +48,10 @@ function singleLine(value: string): string {
 async function findOrCreateAuthUser(
   supabase: ReturnType<typeof serviceClient>,
   rawEmail: string,
-): Promise<{ ok: true; userId: string } | { ok: false; detail: string }> {
+): Promise<
+  | { ok: true; userId: string; created: boolean }
+  | { ok: false; detail: string }
+> {
   // Normalize to lowercase so Alice@x.com and alice@x.com map to the same
   // auth.users row. Without this, listUsers.find compares lowercased while
   // createUser is case-sensitive, producing duplicate accounts on second
@@ -61,7 +65,9 @@ async function findOrCreateAuthUser(
       email_confirm: true,
       user_metadata: { source: "checkout" },
     });
-  if (created?.user) return { ok: true, userId: created.user.id };
+  if (created?.user) {
+    return { ok: true, userId: created.user.id, created: true };
+  }
 
   // Email exists or createUser failed — page through listUsers.
   for (let page = 1; page <= 10; page++) {
@@ -71,7 +77,7 @@ async function findOrCreateAuthUser(
     const match = list.users.find(
       (u) => u.email?.toLowerCase() === email,
     );
-    if (match) return { ok: true, userId: match.id };
+    if (match) return { ok: true, userId: match.id, created: false };
     if (list.users.length < 200) break; // last page
   }
 
@@ -319,6 +325,16 @@ export async function POST(req: Request) {
     competitorCount: config.competitors.length,
     promptCount: config.prompts.length,
   });
+
+  // Newly provisioned users have no password. Send the setup link alongside
+  // the order receipt; existing users can continue using magic-link login.
+  if (userResult.created) {
+    await sendAccountInviteEmail({
+      supabase,
+      to: lead.email,
+      brandName: config.brand.name,
+    });
+  }
 
   // 6. Mark lead converted.
   await supabase

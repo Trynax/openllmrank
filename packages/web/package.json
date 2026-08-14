@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "test": "bun test",
     "seed:demo": "bun --env-file=.env.local scripts/seed-dashboard-demo.ts",
-    "verify:rls": "bun --env-file=.env.local scripts/verify-rls.ts"
+    "verify:rls": "bun --env-file=.env.local scripts/verify-rls.ts",
+    "auth:invite-existing": "bun --env-file=.env.local scripts/send-account-invites.ts"
   },
   "dependencies": {
     "@openllmrank/shared": "workspace:*",
