@@ -36,6 +36,10 @@ export function SetPasswordForm() {
       const refreshToken = hash.get("refresh_token");
 
       if (accessToken && refreshToken) {
+        // A recovery link may be opened after another account was signed in
+        // in this browser. Clear that local session before adopting the
+        // invite tokens so updateUser cannot target the previous account.
+        await supabase.auth.signOut({ scope: "local" });
         const { data, error: sessionError } = await supabase.auth.setSession({
           access_token: accessToken,
           refresh_token: refreshToken,
