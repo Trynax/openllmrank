@@ -137,6 +137,23 @@ a:hover { border-bottom-color: var(--accent); }
   font-size: 14px;
 }
 
+/* Auth pages use the same editorial shell as the dashboard, but keep the
+ * form contained and centered on wide screens. */
+.auth-wrap {
+  width: min(100%, 480px);
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: var(--space-xl) var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.auth-wrap .wordmark {
+  display: block;
+  margin-bottom: var(--space-xl);
+}
+
 /* Hairline divider */
 .rule {
   border: 0;
@@ -171,4 +188,5 @@ a:hover { border-bottom-color: var(--accent); }
 /* Mobile responsive */
 @media (max-width: 820px) {
   .wrap { padding: var(--space-lg) var(--space-md); }
+  .auth-wrap { padding: var(--space-xl) var(--space-md); }
 }

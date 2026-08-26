@@ -292,16 +292,6 @@
   margin: var(--space-lg) 0;
 }
 
-/* ----------------------------------------------------------------- forms */
-
-.auth-wrap {
-  max-width: 420px;
-  margin: 0 auto;
-  padding: var(--space-xxl) var(--space-lg);
-}
-
-.auth-wrap .wordmark { display: block; margin-bottom: var(--space-xl); }
-
 /* ---------------------------------------------------------------- mobile */
 
 @media (max-width: 820px) {

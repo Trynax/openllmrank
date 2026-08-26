@@ -59,5 +59,8 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/auth/set-password"],
+  // The password setup page must load before middleware sees a session: the
+  // recovery session arrives in the URL fragment and is established by the
+  // browser client. Dashboard routes remain fully protected here.
+  matcher: ["/dashboard/:path*"],
 };
